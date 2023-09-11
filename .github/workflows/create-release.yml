@@ -1,0 +1,20 @@
+name: Create Release Branch
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Release version'
+        required: true
+
+jobs:
+  create-branch:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Create Release Branch
+      run: |
+        git checkout -b "release/${{ github.event.inputs.version }}"
+        git push --set-upstream origin "release/${{ github.event.inputs.version }}"
