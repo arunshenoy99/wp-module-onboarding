@@ -16,6 +16,7 @@ jobs:
 
     - name: Create Release Branch
       run: |
-        git checkout trunk
         git checkout -b "release/${{ github.event.inputs.version }}"
+        echo "Hello World" > newfile.txt
+        git commit -m "Add newfile.txt"
         git push --set-upstream origin "release/${{ github.event.inputs.version }}" -u ${{ secrets.RELEASE_SECRET }}
