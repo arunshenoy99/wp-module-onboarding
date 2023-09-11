@@ -52,7 +52,42 @@ jobs:
 
         # Commit the changes
         git add "$file_path"
-        git commit -m "Update boostrap.php to $new_version"    
+        git commit -m "Update boostrap.php to $new_version"
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: 14.x
+        cache: 'npm'
+      
+      # Checks if node_modules exists in the cache.
+    - name: Cache node_modules directory
+      id: cache
+      uses: actions/cache@v3
+      with:
+        path: node_modules
+        key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+        restore-keys: ${{ runner.os }}-node-
+
+    - name: Setup Registry
+      run: printf "@newfold-labs:registry=https://npm.pkg.github.com/\n//npm.pkg.github.com/:_authToken=${{ secrets.NPM_TOKEN }}" > .npmrc
+      if: steps.cache.outputs.cache-hit != 'true'
+
+    # Installs @wordpress/scripts for lint checks if it does not exist in the cache.
+    - name: Install dependencies and update package-lock.json
+      run: |
+        npm i --legacy-peer-deps
+        git add package-lock.json
+        git commit -m "Update package-lock.json to $new_version"
+      if: steps.cache.outputs.cache-hit != 'true'
+
+    - name: Generate Build
+      id: js-lint
+      run: |
+        rm -rf build/*
+        npm run build
+        git add build/
+        git commit -m "Update build to $new_version"
 
     - name: Push Changes
       run: |
