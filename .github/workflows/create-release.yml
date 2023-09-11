@@ -76,7 +76,7 @@ jobs:
     # Installs @wordpress/scripts for lint checks if it does not exist in the cache.
     - name: Install dependencies and update package-lock.json
       run: |
-        ls
+        new_version="${{ github.event.inputs.release_version }}"
         npm i --legacy-peer-deps
         git add package-lock.json
         git commit -m "Update package-lock.json to $new_version"
@@ -85,6 +85,7 @@ jobs:
     - name: Generate Build
       id: js-lint
       run: |
+        new_version="${{ github.event.inputs.release_version }}"
         rm -rf build/*
         npm run build
         git add build/
