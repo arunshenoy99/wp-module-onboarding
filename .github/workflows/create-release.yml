@@ -3,34 +3,19 @@ name: Create Release Branch
 on:
   workflow_dispatch:
     inputs:
-      version:
-        description: 'Release version'
+      release_version:
+        description: 'Release Version'
         required: true
 
 jobs:
-  create-branch:
+  create-release-branch:
     runs-on: ubuntu-latest
+
     steps:
-    - name: Checkout code
+    - name: Check out the code
       uses: actions/checkout@v2
-      with:
-        ref: ${{ github.ref }}
 
     - name: Create Release Branch
       run: |
-        # Extract the GitHub user's username and email from the event context
-        username="${{ github.actor }}"
-        email="${{ github.event.inputs.user_email }}"
-        
-        # Configure Git with the extracted user info
-        git config --global user.name "$username"
-        git config --global user.email "$email"
-        git checkout -b "release/${{ github.event.inputs.version }}"
-        echo "Hello World" > newfile.txt
-        git add newfile.txt
-        git commit -m "Add newfile.txt"
-    - name: Push changes
-      uses: ad-m/github-push-action@master
-      with:
-        github_token: ${{ secrets.GITHUB_TOKEN }}
-        branch: "release/${{ github.event.inputs.version }}"
+        git checkout -b "release/${{ github.event.inputs.release_version }}"
+        git push origin "release/${{ github.event.inputs.release_version }}"
