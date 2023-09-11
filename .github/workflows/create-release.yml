@@ -45,7 +45,7 @@ jobs:
 
         # Replace NFD_ONBOARDING_VERSION with the input value
         new_version="${{ github.event.inputs.release_version }}"
-        updated_content=$(echo "$file_content" | sed "s/define('NFD_ONBOARDING_VERSION', '.*');/define('NFD_ONBOARDING_VERSION', '$new_version');/")
+        updated_content=$(echo "$file_content" | sed "s/define( 'NFD_ONBOARDING_VERSION', '*.*.*' );/define('NFD_ONBOARDING_VERSION', '$new_version');/")
 
         # Update the file with the new content
         echo "$updated_content" > "$file_path"
