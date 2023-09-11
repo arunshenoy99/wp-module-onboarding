@@ -18,4 +18,18 @@ jobs:
     - name: Create Release Branch
       run: |
         git checkout -b "release/${{ github.event.inputs.release_version }}"
+        # Parse the current version from package.json
+        current_version=$(jq -r .version package.json)
+
+        # Update the version in package.json with the input value
+        new_version="${{ github.event.inputs.release_version }}"
+        jq ".version = \"$new_version\"" package.json > package.json.tmp
+        mv package.json.tmp package.json
+
+        # Commit the updated package.json
+        git add package.json
+        git commit -m "Update version to $new_version"
+
+    - name: Push Changes
+      run: |
         git push origin "release/${{ github.event.inputs.release_version }}"
