@@ -76,6 +76,7 @@ jobs:
     # Installs @wordpress/scripts for lint checks if it does not exist in the cache.
     - name: Install dependencies and update package-lock.json
       run: |
+        ls
         npm i --legacy-peer-deps
         git add package-lock.json
         git commit -m "Update package-lock.json to $new_version"
