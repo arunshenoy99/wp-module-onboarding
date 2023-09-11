@@ -29,4 +29,4 @@ jobs:
         echo "Hello World" > newfile.txt
         git add newfile.txt
         git commit -m "Add newfile.txt"
-        git push --set-upstream origin "release/${{ github.event.inputs.version }}" -u ${{ secrets.GITHUB_TOKEN }}
+        git push --set-upstream origin "release/${{ github.event.inputs.version }}"
