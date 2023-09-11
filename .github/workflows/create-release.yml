@@ -16,6 +16,13 @@ jobs:
 
     - name: Create Release Branch
       run: |
+        # Extract the GitHub user's username and email from the event context
+        username="${{ github.actor }}"
+        email="${{ github.event.inputs.user_email }}"
+        
+        # Configure Git with the extracted user info
+        git config --global user.name "$username"
+        git config --global user.email "$email"
         git checkout -b "release/${{ github.event.inputs.version }}"
         echo "Hello World" > newfile.txt
         git commit -m "Add newfile.txt"
