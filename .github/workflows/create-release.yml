@@ -20,6 +20,9 @@ jobs:
         git config --global user.email "github-actions[bot]@users.noreply.github.com"
         git config --global user.name "github-actions[bot]"
         git checkout -b "release/${{ github.event.inputs.release_version }}"
+    
+    - name: Update Version in package.json
+      run: |
         # Parse the current version from package.json
         current_version=$(jq -r .version package.json)
 
@@ -30,7 +33,26 @@ jobs:
 
         # Commit the updated package.json
         git add package.json
-        git commit -m "Update version to $new_version"
+        git commit -m "Update package.json to $new_version"
+
+    - name: Update Version in bootstrap.php
+      run: |
+        # Define the file to be modified
+        file_path="bootstrap.php"
+
+        # Get the current content of the file
+        file_content=$(cat "$file_path")
+
+        # Replace NFD_ONBOARDING_VERSION with the input value
+        new_version="${{ github.event.inputs.release_version }}"
+        updated_content=$(echo "$file_content" | sed "s/define('NFD_ONBOARDING_VERSION', '.*');/define('NFD_ONBOARDING_VERSION', '$new_version');/")
+
+        # Update the file with the new content
+        echo "$updated_content" > "$file_path"
+
+        # Commit the changes
+        git add "$file_path"
+        git commit -m "Update boostrap.php to $new_version"    
 
     - name: Push Changes
       run: |
