@@ -11,7 +11,9 @@ jobs:
   prepare-release-branch:
     name: Prepare Release Branch
     runs-on: ubuntu-latest
-
+    env:
+      new_version: ${{ github.event.inputs.release_version }}
+      release_branch: "release/${{ github.event.inputs.release_version }}"
     steps:
 
     - name: Checkout trunk
@@ -21,11 +23,10 @@ jobs:
       run: |
         git config --global user.email "github-actions[bot]@users.noreply.github.com"
         git config --global user.name "github-actions[bot]"
-        git checkout -b "release/${{ github.event.inputs.release_version }}"
+        git checkout -b "$release_branch"
 
     - name: Update Version in package.json
       run: |
-        new_version="${{ github.event.inputs.release_version }}"
         jq ".version = \"$new_version\"" package.json > package.json.tmp
         mv package.json.tmp package.json
 
@@ -36,8 +37,7 @@ jobs:
       run: |
         file_path="bootstrap.php"
         file_content=$(cat bootstrap.php)
-        new_version="${{ github.event.inputs.release_version }}"
-        updated_content=$(echo "$file_content" | sed "s/define( 'NFD_ONBOARDING_VERSION', '*.*.*' );/define('NFD_ONBOARDING_VERSION', '$new_version');/")
+        updated_content=$(echo "$file_content" | sed "s/define( 'NFD_ONBOARDING_VERSION', '*.*.*' );/define('NFD_ONBOARDING_VERSION', '$new_version' );/")
         echo "$updated_content" > "$file_path"
 
         git add "$file_path"
@@ -70,7 +70,6 @@ jobs:
 
     - name: Install JS Dependencies and Update package-lock.json
       run: |
-        new_version="${{ github.event.inputs.release_version }}"
         npm i --legacy-peer-deps
         git add package-lock.json
         git commit -m "Update package-lock.json to $new_version"
@@ -78,7 +77,6 @@ jobs:
     - name: Generate Build
       id: generate-build
       run: |
-        new_version="${{ github.event.inputs.release_version }}"
         rm -rf build/*
         npm run build
         git add build/
@@ -89,11 +87,16 @@ jobs:
 
     - name: Update POT file
       run: |
-        new_version="${{ github.event.inputs.release_version }}"
         vendor/bin/wp i18n make-pot . ./languages/${{ github.event.repository.name }}.pot --headers='{"Report-Msgid-Bugs-To":"https://github.com/${{ github.repository }}/issues","POT-Creation-Date":null}' --exclude=node_modules,tests,src
-        git add languages/wp-module-onboarding.pot
+        git add ./languages/${{ github.event.repository.name }}.pot
         git commit -m "Version $new_version"
 
     - name: Push Changes
       run: |
-        git push origin "release/${{ github.event.inputs.release_version }}"
+        git push origin "$release_branch"
+
+    - name: Create Pull Request
+      run: |
+        gh pr create -B trunk -H "$release_branch" --title "Release Version $new_version" --body 'Created by Github action bot.'
+      env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
