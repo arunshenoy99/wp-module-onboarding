@@ -68,9 +68,6 @@ jobs:
     - name: Validate composer.json and composer.lock files
       run: composer validate
 
-    - name: Install PHP Dependencies
-      run: composer install --no-progress --optimize-autoloader
-
     - name: Install JS Dependencies and Update package-lock.json
       run: |
         new_version="${{ github.event.inputs.release_version }}"
@@ -86,6 +83,9 @@ jobs:
         npm run build
         git add build/
         git commit -m "Update build to $new_version"
+
+    - name: Install PHP Dependencies
+      run: composer install --no-progress --optimize-autoloader
 
     - name: Update POT file
       run: |
